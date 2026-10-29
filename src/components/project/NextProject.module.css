@@ -1,0 +1,130 @@
+/* Next project banner. The art frame
+   carries data-art-frame: a click names it for the morph into the next page's hero. */
+
+.next {
+  --label: 700 clamp(15px, 0.5rem + 0.7vw, 18px) / 1.4 var(--font-body);
+  margin: 160px clamp(16px, 4vw, 64px) 0;
+}
+
+.card {
+  display: block;
+  position: relative;
+  height: clamp(360px, 58svh, 560px);
+  container-type: inline-size;
+  isolation: isolate;
+  border-radius: var(--radius-card);
+  color: var(--mih-paper);
+  text-decoration: none;
+}
+
+.card:focus-visible {
+  outline: 3px solid var(--mih-ink);
+  outline-offset: 4px;
+}
+
+/* Rounded itself, so the morph's snapshot of it keeps the card's corners. */
+.frame {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: clip;
+  border-radius: var(--radius-card);
+  background: var(--accent);
+}
+
+.art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 700ms var(--ease-throw);
+}
+
+.art[data-focus='left'] {
+  object-position: left center;
+}
+
+.art[data-focus='right'] {
+  object-position: right center;
+}
+
+.art[data-focus='top'] {
+  object-position: center top;
+}
+
+.art[data-focus='bottom'] {
+  object-position: center bottom;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card:hover .art {
+    transform: scale(1.04);
+  }
+}
+
+.caption {
+  display: flex;
+  position: absolute;
+  inset: 0;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 40px;
+  border-radius: var(--radius-card);
+  background: linear-gradient(
+    to bottom,
+    transparent 40%,
+    color-mix(in srgb, var(--mih-ink) 70%, transparent)
+  );
+}
+
+.label {
+  font: var(--label);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Fitted Koulen title, inside the card's 40px padding. */
+.title {
+  display: flex;
+  column-gap: 0.2em;
+  margin-top: 14px;
+  font: 400 min(120px, (100cqi - 80px) / var(--title-em)) / 1 var(--font-display);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.word {
+  display: flex;
+}
+
+.letter {
+  display: block;
+  height: 0.717em;
+  margin-block: -0.04em;
+  padding-block: 0.04em;
+  overflow: clip;
+}
+
+.glyph {
+  display: block;
+  margin-top: -0.108em;
+}
+
+@media (max-width: 959.98px) {
+  .next {
+    margin: 96px 16px 0;
+  }
+
+  .card {
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
+
+  .caption {
+    padding: 20px;
+  }
+
+  .title {
+    font-size: min(56px, (100cqi - 40px) / var(--title-em));
+  }
+}

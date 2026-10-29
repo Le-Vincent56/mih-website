@@ -1,0 +1,44 @@
+/* =============================================================================
+   MADE IN HOUSE — DESIGN TOKENS
+   The brand constants: palette and font families. Everything else (type scale,
+   spacing, radius, shadow, motion) is added here as sections define it.
+   ============================================================================= */
+
+:root {
+  /* ---------------------------------------------------------------------------
+     COLORS — PRIMARY PALETTE (from brand guidelines)
+     The brand is built on a near-black + near-white pairing. Bold contrast.
+     --------------------------------------------------------------------------- */
+  --mih-paper: #fbfeff; /* primary off-white, slight cool cast */
+  --mih-ink: #1d160f; /* primary near-black, slight warm cast */
+
+  /* ---------------------------------------------------------------------------
+     COLORS — CREW PALETTE (from brand guidelines)
+     Each crew member owns a hue. Use for accents, illustrations, role tagging.
+     --------------------------------------------------------------------------- */
+  --mih-brody-red: #fd3456; /* Brody — Level & Gameplay Designer */
+  --mih-vincent-gold: #f0ca41; /* Vincent — Programmer & Audio Engineer */
+  --mih-bella-green: #5ada83; /* Bella — Environment / Animation / Concept */
+  --mih-owen-blue: #3f78eb; /* Owen — Producer & Narrative Designer */
+
+  /* ---------------------------------------------------------------------------
+     TYPOGRAPHY — FAMILIES (from brand guidelines)
+     --------------------------------------------------------------------------- */
+  --font-display: 'Koulen', 'Impact', 'Bebas Neue', sans-serif;
+  --font-body: 'Manrope', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* ---------------------------------------------------------------------------
+     MOTION — EASING AND DURATION
+     Staggers and start times belong to each section, not here.
+     --------------------------------------------------------------------------- */
+  --ease-throw: cubic-bezier(0.25, 1, 0.5, 1); /* quick in, sudden smooth settle (quart out) */
+  --ease-lift: cubic-bezier(0.76, 0, 0.24, 1); /* slow lift, soft landing (quart in-out) */
+  --dur-throw: 700ms;
+  --dur-lift: 1400ms;
+
+  /* ---------------------------------------------------------------------------
+     RADIUS
+     --------------------------------------------------------------------------- */
+  --radius-card: 15px; /* image cards */
+}

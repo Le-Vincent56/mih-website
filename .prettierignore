@@ -1,0 +1,8 @@
+dist/
+docs/
+.superpowers/
+.claude/skills/
+package-lock.json
+*.md
+# Prettier's MDX parser is MDX v1 and corrupts MDX 3 syntax such as {/* comments */}.
+*.mdx

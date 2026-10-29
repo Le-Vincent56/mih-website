@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- The <title> comes from each route's <Head> (Layout's default, or the page's own). -->
+    <!-- Favicons: the house mark. The SVG turns paper on dark tab bars; the .ico is the fallback. -->
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!-- Brand fonts: Koulen (display) and Manrope 300-800 (body/UI) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Koulen&family=Manrope:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Motion gate. Without JS the page renders
+         composed; with JS, animated elements wait for mih-motion, added once Koulen loads (or
+         after 1.5s). Placed after the fonts stylesheet so @font-face is known when it runs. -->
+    <script id="mih-motion-gate">
+      (function () {
+        var classes = document.documentElement.classList;
+        var started = false;
+        function start() {
+          if (started) return;
+          started = true;
+          classes.add('mih-motion');
+        }
+        classes.add('mih-js');
+        try {
+          document.fonts.load('1em Koulen').then(start, start);
+          setTimeout(start, 1500);
+        } catch (e) {
+          start();
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

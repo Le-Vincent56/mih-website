@@ -1,0 +1,127 @@
+/* Letterbox header. Past its page's
+   zone it gives way to the floating circle (FloatingMenu.module.css). The swap
+   animates `transform`; the homepage intro uses the separate `translate` property, so the two
+   never fight over one value. */
+
+.header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  height: 56px;
+  padding: 0 24px;
+  background: var(--mih-ink);
+  color: var(--mih-paper);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* The circle state: the bar is gone (and unfocusable), except while it lifts away or drops back
+   in (barMorph.ts sets html[data-bar-swap]). */
+:global(html:not([data-bar-swap])) .header[data-mode='circle'] {
+  visibility: hidden;
+}
+
+/* House logo + Koulen wordmark. The logo is a mask (house opaque, letters transparent) painted
+   in the link's color (paper at rest), so the letters show the ink bar through them. */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.mark {
+  flex: none;
+  width: 32px;
+  aspect-ratio: 530 / 549;
+  background: currentColor;
+  mask: url('../../assets/brand/logo-mark.png') center / contain no-repeat;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.nav ul {
+  display: flex;
+  gap: 28px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Koulen like the wordmark, a size below it. */
+.nav a {
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+/* Accent hover: the link turns the accent accentHover.ts pulled for this
+   hover, then fades back to paper. Hover-capable pointers only, so a tap never sticks. */
+.logo,
+.nav a {
+  transition: color 200ms var(--ease-throw);
+}
+
+@media (hover: hover) {
+  .logo:hover,
+  .nav a:hover {
+    color: var(--hover-accent, inherit);
+    transition-duration: 150ms;
+  }
+}
+
+.logo:focus-visible,
+.nav a:focus-visible {
+  outline: 2px solid var(--mih-paper);
+  outline-offset: 4px;
+}
+
+/* Homepage intro: slides down as the crew settles (delay from rows.ts as --delay). */
+:global(html.mih-js:not(.mih-motion)) .header[data-intro] {
+  visibility: hidden;
+}
+
+:global(html.mih-motion) .header[data-intro] {
+  animation: slide-down var(--dur-throw) var(--ease-throw) var(--delay) both;
+}
+
+@keyframes slide-down {
+  from {
+    translate: 0 -100%;
+  }
+}
+
+@media (max-width: 767px) {
+  .header {
+    padding: 0 16px;
+  }
+
+  .nav {
+    display: none;
+  }
+
+  .actions {
+    gap: 12px;
+  }
+}

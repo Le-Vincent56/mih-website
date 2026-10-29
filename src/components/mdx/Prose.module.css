@@ -1,0 +1,87 @@
+/* The MDX body's type. Text is capped at
+   720px; figures, galleries, and video take the whole column. */
+
+.prose {
+  --muted: color-mix(in srgb, var(--mih-ink) 60%, var(--mih-paper));
+  --rule: color-mix(in srgb, var(--mih-ink) 18%, var(--mih-paper));
+  font: 500 19px / 1.65 var(--font-body);
+}
+
+.prose > :is(p, ul, ol, h2, h3, blockquote) {
+  max-width: 720px;
+}
+
+.prose p {
+  margin: 0 0 1.1em;
+}
+
+.prose h2 {
+  margin: 96px 0 24px;
+  font: 400 clamp(44px, 2rem + 2.2vw, 64px) / 1 var(--font-display);
+  text-transform: uppercase;
+}
+
+.prose > h2:first-child {
+  margin-top: 0;
+}
+
+.prose h3 {
+  margin: 48px 0 12px;
+  font: 800 22px / 1.3 var(--font-body);
+}
+
+.prose a {
+  color: inherit;
+  text-decoration: underline 2px;
+  text-underline-offset: 4px;
+}
+
+.prose a:focus-visible {
+  outline: 3px solid var(--mih-ink);
+  outline-offset: 2px;
+}
+
+.prose :is(ul, ol) {
+  margin: 0 0 1.1em;
+  padding-left: 1.2em;
+}
+
+.prose li + li {
+  margin-top: 0.4em;
+}
+
+.prose blockquote {
+  margin: 48px 0;
+  padding-left: 24px;
+  border-left: 4px solid var(--accent);
+  font: 600 24px / 1.45 var(--font-body);
+}
+
+.prose blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.prose code {
+  padding: 0.1em 0.3em;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--mih-ink) 6%, var(--mih-paper));
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+.prose hr {
+  height: 1px;
+  margin: 64px 0;
+  border: 0;
+  background: var(--rule);
+}
+
+@media (max-width: 959.98px) {
+  .prose {
+    font-size: 17px;
+  }
+
+  .prose blockquote {
+    font-size: 20px;
+  }
+}

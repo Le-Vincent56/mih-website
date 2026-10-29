@@ -1,0 +1,583 @@
+/* Crew.
+   Resting styles are the no-JS fallback: the lineup as a picture, then every member's select
+   screen stacked as a plain block on its own accent. With html.mih-js the select screen becomes a
+   hidden layer over the section, shown while crewSelect.ts sets data-open. The controller also
+   sets data-crew="ready", data-hover, and data-covered (the slash has ended). */
+
+.section {
+  --crew-margin: clamp(16px, 4vw, 64px);
+  --crew-top: clamp(48px, 8svh, 72px);
+  --crew-label: 700 clamp(15px, 0.5rem + 0.7vw, 18px) / 1.4 var(--font-body);
+  --crew-skew: -8deg;
+  /* The silhouette canvas is 743×1110. Four members are always 57svh tall; a larger crew
+     shrinks to fit 92vw with each canvas overlapping its neighbors by 26.5% per side. */
+  --sil-h: min(57svh, 92vw / (0.6694 * (0.47 * var(--count, 4) + 0.53)));
+  --sil-w: calc(var(--sil-h) * 0.6694);
+
+  position: relative;
+  overflow: clip;
+  background: var(--mih-paper);
+  color: var(--mih-ink);
+}
+
+/* The scroll hold's wrapper: only the desktop motion version gives it a length (see the end). */
+.hold {
+  --crew-hold: 50svh;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.label,
+.role {
+  font: var(--crew-label);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Koulen names: one cap-box clip per letter
+   --------------------------------------------------------------------------------------------- */
+
+.line {
+  display: inline-flex;
+  white-space: nowrap;
+}
+
+.letterBox {
+  display: block;
+  height: 0.717em;
+  overflow: clip;
+  /* Room for the round letters' overshoot (O, S, C, G, D reach about 0.01em past the flat cap
+     height) and their anti-aliased edges. The negative margin cancels it, so layout is unchanged;
+     only the clip edge moves. The hero's touching rows keep the exact box. */
+  padding-block: 0.04em;
+  margin-block: -0.04em;
+}
+
+.letter {
+  display: block;
+  margin-top: -0.108em;
+  line-height: 1;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   At rest: the top row and the lineup
+   --------------------------------------------------------------------------------------------- */
+
+.lineupLayer {
+  position: relative;
+}
+
+.top {
+  position: relative;
+  z-index: 5;
+  padding: clamp(48px, 12vw, 72px) 16px 0;
+}
+
+.label {
+  margin: 0;
+}
+
+.lineup {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  margin: 32px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.member {
+  position: relative;
+  flex: none;
+  margin-inline: calc(-0.265 * var(--sil-w));
+}
+
+/* The hovered member paints above its neighbors. */
+.member[data-hovered] {
+  z-index: 2;
+}
+
+.memberButton {
+  display: block;
+  width: var(--sil-w);
+  height: var(--sil-h);
+  padding: 0;
+  border: 0;
+  background: none;
+  /* The hand shows only over a figure's hover shape (data-pointing), not its whole box. */
+  cursor: inherit;
+  /* --lean: the proximity lean, set on the nearest member while no one is hovered. */
+  transform: scale(var(--lean, 1));
+  transform-origin: 50% 100%;
+  transition:
+    transform 450ms var(--ease-throw),
+    opacity 450ms var(--ease-throw);
+}
+
+/* Keyboard focus shows as the hover state (scale and name), not an outline. */
+.memberButton:focus-visible {
+  outline: none;
+}
+
+.section[data-pointing] {
+  cursor: pointer;
+}
+
+.section[data-hover] .memberButton {
+  opacity: 0.4;
+  transform: scale(0.96);
+}
+
+.section[data-hover] .member[data-hovered] .memberButton {
+  opacity: 1;
+  transform: scale(1.12);
+}
+
+.silhouette {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* The giant names behind the lineup: desktop, with JS only. */
+.hoverNames {
+  display: none;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   The select screen. Resting styles are the no-JS stack.
+   --------------------------------------------------------------------------------------------- */
+
+.flood,
+.roster,
+.back {
+  display: none;
+}
+
+.article {
+  position: relative;
+  overflow: clip;
+  background: var(--accent);
+}
+
+.heading {
+  margin: 0;
+  outline: none;
+}
+
+.name {
+  display: block;
+  font-family: var(--font-display);
+  line-height: 1;
+  color: var(--mih-ink);
+  text-transform: uppercase;
+}
+
+.portrait {
+  box-sizing: border-box;
+}
+
+.portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.info {
+  background: var(--mih-ink);
+  color: var(--mih-paper);
+  transform: skewX(var(--crew-skew));
+}
+
+.infoInner {
+  transform: skewX(calc(-1 * var(--crew-skew)));
+}
+
+.role {
+  margin: 0;
+  color: var(--accent);
+}
+
+.bio {
+  margin-top: 12px;
+  font: 600 clamp(15px, 0.5rem + 0.55vw, 18px) / 1.5 var(--font-body);
+}
+
+.bio p {
+  margin: 0;
+}
+
+.bio p + p {
+  margin-top: 0.6em;
+}
+
+/* The back arrow: a 32px stroke arrow in a 48px target that nudges left on hover and focus. */
+.back {
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--mih-ink);
+  cursor: pointer;
+}
+
+.back svg {
+  width: 32px;
+  height: 32px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: translate 300ms var(--ease-throw);
+}
+
+.back:focus-visible {
+  outline: 3px solid var(--mih-ink);
+  outline-offset: 2px;
+}
+
+.back:focus-visible svg {
+  translate: -6px 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .back:hover svg {
+    translate: -6px 0;
+  }
+}
+
+.tile {
+  position: relative;
+  top: 0;
+  flex: none;
+  width: var(--tile);
+  height: var(--tile);
+  padding: 0;
+  border: 0;
+  overflow: clip;
+  background: var(--mih-ink);
+  cursor: pointer;
+  transform: skewX(var(--crew-skew));
+  transition:
+    top 200ms var(--ease-throw),
+    box-shadow 200ms var(--ease-throw);
+}
+
+/* Head and shoulders: the figure at 300% of the tile's height, its top 10% above the tile. */
+.tile img {
+  position: absolute;
+  top: -10%;
+  left: 50%;
+  height: 300%;
+  max-width: none;
+  transform: translateX(-50%) skewX(calc(-1 * var(--crew-skew)));
+}
+
+.tile[aria-current='true'] {
+  top: calc(-1 * max(6px, 0.8vw));
+  box-shadow: 0 0 0 max(3px, 0.3vw) var(--mih-paper);
+}
+
+.tile:focus-visible {
+  outline: 3px solid var(--mih-ink);
+  outline-offset: 6px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tile:not([aria-current='true']):hover {
+    top: calc(-0.5 * max(6px, 0.8vw));
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   With JS: the select screen is a layer over the section, hidden until opened
+   --------------------------------------------------------------------------------------------- */
+
+:global(html.mih-js) .select {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 6;
+  overflow: clip;
+  visibility: hidden;
+}
+
+:global(html.mih-js) .section[data-open] .select {
+  visibility: visible;
+}
+
+.section[data-covered] .lineupLayer {
+  visibility: hidden;
+}
+
+:global(html.mih-js) .flood {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background-color: var(--flood, var(--mih-paper));
+  clip-path: polygon(100% 0, 130% 0, 100% 100%, 70% 100%);
+}
+
+/* The flood's color cross-fades only between members, never as it slashes in. */
+.section[data-covered] .flood {
+  transition: background-color 500ms var(--ease-lift);
+}
+
+:global(html.mih-js) .article {
+  background: none;
+  visibility: hidden;
+}
+
+:global(html.mih-js) .article[data-current],
+:global(html.mih-js) .article[data-leaving] {
+  visibility: visible;
+}
+
+:global(html.mih-js) .roster {
+  display: flex;
+}
+
+:global(html.mih-js) .back {
+  display: grid;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Desktop (960px and wider)
+   --------------------------------------------------------------------------------------------- */
+
+@media (min-width: 960px) {
+  .lineupLayer {
+    height: 100svh;
+  }
+
+  .top {
+    position: absolute;
+    top: var(--crew-top);
+    right: var(--crew-margin);
+    left: var(--crew-margin);
+    padding: 0;
+  }
+
+  .lineup {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: 0;
+  }
+
+  :global(html.mih-js) .hoverNames {
+    position: absolute;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+  }
+
+  /* Its cap box is centered at 40% of the height; the controller fits its size. */
+  .hoverName {
+    position: absolute;
+    top: 40%;
+    left: 2%;
+    width: 96%;
+    font-family: var(--font-display);
+    line-height: 1;
+    color: var(--mih-ink);
+    text-align: center;
+    text-transform: uppercase;
+    translate: 0 -50%;
+  }
+
+  :global(html.mih-js) .hoverName .letter {
+    transform: translateY(110%);
+  }
+
+  :global(html.mih-js) .select {
+    bottom: 0;
+  }
+
+  .panels,
+  .article {
+    height: 100svh;
+  }
+
+  :global(html.mih-js) .panels {
+    position: absolute;
+    inset: 0;
+  }
+
+  :global(html.mih-js) .article {
+    position: absolute;
+    inset: 0;
+  }
+
+  .heading {
+    position: absolute;
+    top: max(9svh, 72px);
+    left: var(--crew-margin);
+    z-index: 3;
+  }
+
+  /* The fitted box: the controller sizes the name to fill it (44vw, caps up to 30svh). */
+  .name {
+    width: 44vw;
+    font-size: min(9vw, 41.8svh);
+  }
+
+  /* Flush with the right edge, with a clean ink line where it meets the flood. */
+  .portrait {
+    position: absolute;
+    top: -6svh;
+    right: 0;
+    z-index: 2;
+    width: min(80.2svh, 52vw);
+    height: 122svh;
+    border-left: 3px solid var(--mih-ink);
+  }
+
+  .info {
+    position: absolute;
+    bottom: 15svh;
+    left: var(--crew-margin);
+    z-index: 3;
+    box-sizing: border-box;
+    width: 38vw;
+    padding: clamp(20px, 2.2vw, 36px) clamp(24px, 2.6vw, 44px);
+  }
+
+  /* The arrow's tip (15px into its target) lines up with the side margin. */
+  .back {
+    position: absolute;
+    bottom: 5svh;
+    left: calc(var(--crew-margin) - 15px);
+    z-index: 4;
+  }
+
+  .roster {
+    --tile: clamp(56px, 6.2vw, 96px);
+
+    position: absolute;
+    right: 3vw;
+    bottom: 5svh;
+    z-index: 4;
+    gap: max(8px, 0.8vw);
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Phone (below 960px)
+   --------------------------------------------------------------------------------------------- */
+
+@media (max-width: 959px) {
+  .article {
+    display: flex;
+    flex-direction: column;
+    padding: 128px 0 48px;
+  }
+
+  .heading {
+    margin: 0 16px;
+  }
+
+  .name {
+    width: 100%;
+    font-size: min(18vw, 25svh);
+  }
+
+  /* Full-bleed on phones, so the ink line sits on the edge that meets the name: the top. */
+  .portrait {
+    width: 100vw;
+    height: 62svh;
+    margin-top: 20px;
+    border-top: 3px solid var(--mih-ink);
+  }
+
+  .info {
+    position: relative;
+    z-index: 1;
+    margin: -32px 16px 0;
+    padding: 20px 22px;
+    transform: skewX(-6deg);
+  }
+
+  .infoInner {
+    transform: skewX(6deg);
+  }
+
+  /* With JS, the select screen's members share one cell, so switching never moves the page. */
+  /* minmax(0, 1fr): an unwrapped Koulen line must never widen the track it's fitted to. */
+  :global(html.mih-js) .panels {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  :global(html.mih-js) .article {
+    grid-area: 1 / 1;
+    padding-bottom: 0;
+  }
+
+  .back {
+    position: absolute;
+    top: 72px;
+    left: 1px;
+    z-index: 4;
+  }
+
+  .roster {
+    --tile: 56px;
+
+    position: relative;
+    z-index: 4;
+    justify-content: center;
+    gap: 8px;
+    padding: 24px 0 48px;
+  }
+
+  /* Open: the select screen takes the flow; the lineup waits on top until the slash covers it. */
+  .section[data-open] .lineupLayer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+  }
+
+  :global(html.mih-js) .section[data-open] .select {
+    position: relative;
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   The scroll hold: on desktop the wrapper is a hold's length taller
+   than the one-screen section, which pins at the screen's top before the footer comes up.
+   --------------------------------------------------------------------------------------------- */
+
+@media (min-width: 960px) and (prefers-reduced-motion: no-preference) {
+  :global(html.mih-js) .hold {
+    height: calc(100svh + var(--crew-hold));
+  }
+
+  :global(html.mih-js) .section {
+    position: sticky;
+    top: 0;
+  }
+}

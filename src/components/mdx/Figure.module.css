@@ -1,0 +1,19 @@
+/* <Figure src alt caption>: the image at its own aspect ratio. */
+
+.figure {
+  margin: 48px 0;
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-card);
+  background: var(--accent);
+}
+
+.caption {
+  margin-top: 12px;
+  color: color-mix(in srgb, var(--mih-ink) 60%, var(--mih-paper));
+  font: 600 15px / 1.45 var(--font-body);
+}

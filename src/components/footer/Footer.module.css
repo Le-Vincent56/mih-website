@@ -1,0 +1,132 @@
+/* Footer band. Static apart from the links'
+   accent hover, a color fade. It adds no margin of its own; each page keeps its own bottom
+   spacing. */
+
+.footer {
+  --label: 700 clamp(15px, 0.5rem + 0.7vw, 18px) / 1.4 var(--font-body);
+  --muted: color-mix(in srgb, var(--mih-paper) 60%, var(--mih-ink));
+  --rule: color-mix(in srgb, var(--mih-paper) 18%, var(--mih-ink));
+  padding: 48px 24px;
+  background: var(--mih-ink);
+  color: var(--mih-paper);
+  font-family: var(--font-body);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+/* The header's lockup: the house mark (a mask in the link's color) beside the Koulen wordmark. */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.mark {
+  flex: none;
+  width: 32px;
+  aspect-ratio: 530 / 549;
+  background: currentColor;
+  mask: url('../../assets/brand/logo-mark.png') center / contain no-repeat;
+}
+
+.links {
+  display: flex;
+  gap: 32px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Social links: an icon in the site's stroke style, then the label. */
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: inherit;
+  font: var(--label);
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+/* Accent hover: the whole link, icon included, turns the accent
+   accentHover.ts pulled for this hover, then fades back to paper. Hover-capable pointers only. */
+.logo,
+.link {
+  transition: color 200ms var(--ease-throw);
+}
+
+@media (hover: hover) {
+  .logo:hover,
+  .link:hover {
+    color: var(--hover-accent, inherit);
+    transition-duration: 150ms;
+  }
+}
+
+.link svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.logo:focus-visible,
+.link:focus-visible {
+  outline: 2px solid var(--mih-paper);
+  outline-offset: 4px;
+}
+
+.bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px 24px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.bottom p {
+  margin: 0;
+}
+
+@media (max-width: 767px) {
+  .footer {
+    padding-inline: 16px;
+  }
+
+  .top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  .links {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .bottom {
+    flex-direction: column;
+  }
+}

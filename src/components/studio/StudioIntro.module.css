@@ -1,0 +1,243 @@
+/* Studio intro.
+   Resting styles are the fallback: six stacked panels, which is what no-JS and reduced-motion
+   visitors see. With motion, the section grows to six screens, the pinned frame appears, and
+   stage.ts draws into it; the panels stay in the document for assistive tech, visually hidden. */
+
+.section {
+  position: relative;
+  --studio-margin: clamp(16px, 4vw, 64px);
+  --studio-title-top: 12svh;
+  --studio-text: 600 clamp(18px, 0.6rem + 1.2vw, 28px) / 1.45 var(--font-body);
+  --studio-text-width: 40rem;
+  --studio-label-size: clamp(15px, 0.5rem + 0.7vw, 18px);
+  --studio-label-line: calc(var(--studio-label-size) * 1.4);
+  --studio-label: 700 var(--studio-label-size) / var(--studio-label-line) var(--font-body);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Fallback panels (and the semantic content)
+   --------------------------------------------------------------------------------------------- */
+
+.valueList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2rem;
+  min-height: 100svh;
+  padding: var(--studio-title-top) var(--studio-margin);
+  box-sizing: border-box;
+  background: var(--panel-bg);
+  color: var(--panel-fg);
+}
+
+.panel[data-align='left'] {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.panel[data-align='right'] {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.panel[data-align='center'] {
+  align-items: center;
+  text-align: center;
+}
+
+.panelLabel {
+  margin: 0 0 -1rem;
+  font: var(--studio-label);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.panelTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(64px, 13vw, 30svh);
+  font-weight: 400;
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.panelText {
+  max-width: var(--studio-text-width);
+  margin: 0;
+  font: var(--studio-text);
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Pinned frame and the stage's elements (built by stage.ts)
+   --------------------------------------------------------------------------------------------- */
+
+.frame {
+  position: sticky;
+  top: 0;
+  display: none;
+  /* The large viewport height, so a phone toolbar collapsing on scroll never leaves a strip of
+     page background under the frame. */
+  height: 100lvh;
+  overflow: clip;
+
+  /* One fixed, vertically centered spot for every station: the block (label, title, and the
+     tallest paragraph, both measured by stage.ts) is centered in the small viewport, which stays
+     visible with phone toolbars shown, and never rides up under the 56px header. */
+  --studio-label-area: calc(var(--studio-label-line) + 1rem);
+  --studio-block-height: calc(
+    var(--studio-label-area) + var(--studio-title-height, 0px) + 2rem +
+      var(--studio-text-height, 0px)
+  );
+  --studio-title-top: max(
+    56px + 1rem + var(--studio-label-area),
+    (100svh - var(--studio-block-height)) / 2 + var(--studio-label-area)
+  );
+}
+
+.title {
+  position: absolute;
+  top: var(--studio-title-top);
+  left: 0;
+  display: flex;
+  font-family: var(--font-display);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.slot {
+  position: relative;
+  flex: none;
+  display: inline-block;
+  height: 100%;
+  overflow: clip;
+}
+
+/* Letters sit in the capitals' box: Koulen's cap top is 0.108em below the line top. */
+.slot > span {
+  position: absolute;
+  top: -0.108em;
+  left: 0;
+}
+
+.label {
+  position: absolute;
+  top: calc(var(--studio-title-top) - 1rem - var(--studio-label-line));
+  right: 0;
+  left: 0;
+  height: var(--studio-label-line);
+  font: var(--studio-label);
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+.label > span {
+  display: inline-block;
+  height: var(--studio-label-line);
+  overflow: clip;
+  vertical-align: top;
+}
+
+.label > span > span {
+  display: inline-block;
+}
+
+.measure {
+  position: absolute;
+  top: calc(var(--studio-title-top) + var(--studio-title-height, 0px) + 2rem);
+  width: min(var(--studio-text-width), 100% - 2 * var(--studio-margin));
+  margin: 0;
+  font: var(--studio-text);
+  visibility: hidden;
+}
+
+/* Each measured word stays whole: a hyphenated word ("long-term") split across lines would
+   report one box spanning both rows, and its animated copy would land in the wrong place. */
+.measure > span {
+  white-space: nowrap;
+}
+
+.measure[data-align='left'] {
+  left: var(--studio-margin);
+  text-align: left;
+}
+
+.measure[data-align='right'] {
+  right: var(--studio-margin);
+  text-align: right;
+}
+
+.measure[data-align='center'] {
+  left: 50%;
+  text-align: center;
+  translate: -50% 0;
+}
+
+.word {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  font: var(--studio-text);
+  white-space: pre;
+}
+
+/* Split letters lose kerning and ligatures, so the measured words drop them too: otherwise the
+   animated words come out wider than the boxes they are placed by, and the gaps between them
+   close. After the `font` shorthands above, which would reset both. */
+.measure,
+.word {
+  font-kerning: none;
+  font-variant-ligatures: none;
+}
+
+.letter {
+  display: inline-block;
+  height: 1.45em;
+  overflow: clip;
+}
+
+.letter > span {
+  display: inline-block;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   The gate: the pinned version only under html.mih-motion and without reduced motion.
+   --------------------------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  :global(html.mih-motion) .section {
+    /* One screen plus the pinned scroll: 7 screens (stations.ts, pinnedScreens). */
+    height: 800svh;
+  }
+
+  :global(html.mih-motion) .frame {
+    display: block;
+  }
+
+  :global(html.mih-motion) .panels {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}

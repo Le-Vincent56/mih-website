@@ -1,0 +1,314 @@
+/* Hero.
+   Resting styles are the composed scene: that is what no-JS and reduced-motion visitors see.
+   Motion only applies under html.mih-motion (the gate script in index.html). Delays come from
+   rows.ts / crew.ts as --delay; the drift loop length comes from useHeroMotion as
+   --drift-duration. */
+
+.hero {
+  position: relative;
+  height: 100svh;
+  min-height: 480px;
+  overflow: clip;
+  isolation: isolate;
+  background: var(--mih-paper);
+  container-type: size;
+
+  /* Rows touch: Koulen's capitals (cap top to baseline overshoot) are 0.717em tall and start
+     0.108em below the top of a line-height: 1 box (measured in the browser), so a row's font
+     size is its pitch / 0.717 and its text shifts up by 0.108em. */
+  --row-pitch: calc(100cqh / 4);
+  --row-offset: 0px;
+  --row-size: calc(var(--row-pitch) / 0.717);
+  --row-cap-top: 0.108em;
+  --row-stroke: max(1.5px, 0.011em);
+
+  /* Crew geometry. */
+  --crew-height: 100cqh;
+  --crew-width: calc(var(--crew-height) * 2442 / 2515);
+  --crew-bottom: -18cqh;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Layers: rows behind the crew, except the front row (data-front, per breakpoint), which passes
+   in front of it in solid ink. .rows sets no z-index, so each row stacks against the crew. */
+.rows {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.row {
+  z-index: 1;
+}
+
+.crew {
+  z-index: 2;
+}
+
+.row[data-front='desktop'] {
+  z-index: 3;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Rows: outer .entry plays the throw-in, inner .drift loops forever; the transforms compose, so
+   each row coasts into its drift. Solid rows are anchored left and drift left; outline rows are
+   anchored right and drift right, so a row's leading edge starts exactly at the screen edge.
+   --------------------------------------------------------------------------------------------- */
+
+.row {
+  position: absolute;
+  top: calc(var(--i) * var(--row-pitch) + var(--row-offset));
+  right: 0;
+  left: 0;
+  height: var(--row-pitch);
+  font-family: var(--font-display);
+  font-size: var(--row-size);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.rows > .row:nth-child(n + 5) {
+  display: none;
+}
+
+.entry {
+  position: absolute;
+  top: calc(-1 * var(--row-cap-top));
+}
+
+.row[data-style='solid'] .entry {
+  left: 0;
+}
+
+.row[data-style='outline'] .entry {
+  right: 0;
+}
+
+.drift {
+  display: flex;
+}
+
+.half {
+  display: flex;
+  flex: none;
+}
+
+.word {
+  padding-right: 0.22em;
+}
+
+.row[data-style='solid'] {
+  color: var(--mih-ink);
+}
+
+.row[data-style='outline'] {
+  color: var(--mih-paper);
+  -webkit-text-stroke: var(--row-stroke) var(--mih-ink);
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Crew: same-canvas layers stacked exactly, centered, cropped by the hero's bottom edge.
+   --------------------------------------------------------------------------------------------- */
+
+.crew {
+  position: absolute;
+  bottom: var(--crew-bottom);
+  left: 50%;
+  width: var(--crew-width);
+  height: var(--crew-height);
+  translate: -50% 0;
+}
+
+.crewLayer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Pause toggle: top-right, just below the header. Paper with a difference blend, so it reads
+   near-ink over paper and near-paper over the ink rows as they drift beneath it.
+   --------------------------------------------------------------------------------------------- */
+
+.pause {
+  position: absolute;
+  top: calc(56px + 16px);
+  right: 24px;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--mih-paper);
+  mix-blend-mode: difference;
+  cursor: pointer;
+}
+
+.pause svg {
+  width: 28px;
+  height: 28px;
+  fill: currentColor;
+}
+
+.pause:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Nothing drifts without JS or under reduced motion, so the toggle has no job there. */
+:global(html:not(.mih-js)) .pause {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pause {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Motion (only under the gate)
+   --------------------------------------------------------------------------------------------- */
+
+:global(html.mih-js:not(.mih-motion)) .row,
+:global(html.mih-js:not(.mih-motion)) .crewLayer,
+:global(html.mih-js:not(.mih-motion)) .pause {
+  visibility: hidden;
+}
+
+/* Exit (hero, "Exit"): as the hero scrolls away, useHeroMotion writes --hero-exit (0 to 1). The
+   crew sinks behind the bottom edge and each row fades; opacity sits on each .row, never .rows,
+   which would become a stacking context and break the front row. */
+:global(html.mih-motion) .crew {
+  transform: translateY(calc(var(--hero-exit, 0) * 110%));
+}
+
+/* While the crew sinks, the bottom edge fades instead of cutting their legs. The band grows from
+   nothing over the first quarter of the exit, so the hero at rest is untouched. Only the
+   gradient's alpha counts; the body behind is paper too. */
+:global(html.mih-motion) .hero {
+  --hero-fade: calc(min(var(--hero-exit, 0) * 4, 1) * 160px);
+  mask-image: linear-gradient(to top, transparent, var(--mih-ink) var(--hero-fade));
+}
+
+:global(html.mih-motion) .row {
+  opacity: calc(1 - var(--hero-exit, 0));
+}
+
+:global(html.mih-motion) .row[data-style='solid'] .entry {
+  animation: throw-from-right var(--dur-throw) var(--ease-throw) var(--delay) both;
+}
+
+:global(html.mih-motion) .row[data-style='outline'] .entry {
+  animation: throw-from-left var(--dur-throw) var(--ease-throw) var(--delay) both;
+}
+
+:global(html.mih-motion) .row[data-style='solid'] .drift {
+  animation: drift-left var(--drift-duration, 120s) linear var(--delay) infinite both
+    var(--drift-play, running);
+}
+
+:global(html.mih-motion) .row[data-style='outline'] .drift {
+  animation: drift-right var(--drift-duration, 120s) linear var(--delay) infinite both
+    var(--drift-play, running);
+}
+
+/* Paused by the header toggle or asleep off screen. A custom property, because a longhand
+   animation-play-state rule would lose to the more specific animation shorthand above. */
+:global(html[data-drift='paused']) .hero,
+.hero[data-asleep] {
+  --drift-play: paused;
+}
+
+:global(html.mih-motion) .pause {
+  animation: fade-in var(--dur-throw) var(--ease-throw) var(--delay) both;
+}
+
+:global(html.mih-motion) .crewLayer {
+  animation:
+    rise var(--dur-lift) var(--ease-lift) var(--delay) both,
+    fade-in calc(var(--dur-lift) * 0.3) linear var(--delay) both;
+}
+
+@keyframes throw-from-right {
+  from {
+    transform: translateX(100cqw);
+  }
+}
+
+@keyframes throw-from-left {
+  from {
+    transform: translateX(-100cqw);
+  }
+}
+
+@keyframes drift-left {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes drift-right {
+  to {
+    transform: translateX(50%);
+  }
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(110%);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Phone: same scene, taller. More, larger rows; the crew spans the width.
+   --------------------------------------------------------------------------------------------- */
+
+@media (max-width: 767px) {
+  .hero {
+    --row-pitch: calc(100cqh / 6.5);
+    /* Shifts the rows so the front row (index 4) crosses the shirts, never the faces. */
+    --row-offset: calc(var(--row-pitch) * 0.45);
+    --crew-width: 100cqw;
+    --crew-height: calc(var(--crew-width) * 2515 / 2442);
+    --crew-bottom: -8cqw;
+  }
+
+  .pause {
+    top: calc(56px + 8px);
+    right: 8px;
+  }
+
+  .rows > .row:nth-child(n + 5) {
+    display: block;
+  }
+
+  .row[data-front='desktop'] {
+    z-index: 1;
+  }
+
+  .row[data-front='phone'] {
+    z-index: 3;
+  }
+}

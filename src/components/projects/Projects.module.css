@@ -1,0 +1,572 @@
+/* Projects.
+   Resting styles are the fallback: the phone list, and from 960px the grid. That's what no-JS and
+   reduced-motion visitors see. projectsWheel.ts sets data-view="wheel" or "grid" on the section;
+   with html.mih-js the wheel layout is applied before it starts, so the grid never flashes. */
+
+/* The scroll hold's wrapper: only the wheel view gives it a length (see the wheel below). */
+.hold {
+  --projects-hold: 50svh;
+}
+
+.section {
+  position: relative;
+  background: var(--mih-paper);
+  color: var(--mih-ink);
+  --projects-margin: clamp(16px, 4vw, 64px);
+  --projects-top: clamp(48px, 8svh, 72px);
+  --projects-label-size: clamp(15px, 0.5rem + 0.7vw, 18px);
+  --projects-label: 700 var(--projects-label-size) / 1.4 var(--font-body);
+  --projects-title: clamp(56px, min(8.33vw, 13.3svh), 120px);
+  --card-w: min(44vw, (100svh - 240px) * 4 / 3);
+  --card-h: calc(var(--card-w) * 3 / 4);
+  --card-top: calc(50svh - var(--card-h) / 2);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Shared pieces
+   --------------------------------------------------------------------------------------------- */
+
+.label,
+.status,
+.more,
+.counter,
+.draft {
+  font: var(--projects-label);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.label {
+  margin: 0;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: clip;
+  border-radius: var(--radius-card);
+  background: var(--accent);
+  color: inherit;
+  transform-origin: 0 0;
+}
+
+.card:focus-visible {
+  outline: 3px solid var(--mih-ink);
+  outline-offset: 4px;
+}
+
+.art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The part of the key art the crop keeps: the project's keyArtFocus (center by default). */
+.art[data-focus='left'] {
+  object-position: left center;
+}
+
+.art[data-focus='right'] {
+  object-position: right center;
+}
+
+.art[data-focus='top'] {
+  object-position: center top;
+}
+
+.art[data-focus='bottom'] {
+  object-position: center bottom;
+}
+
+.draft {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--mih-ink);
+  color: var(--mih-paper);
+}
+
+/* Each text piece sits in its own clip box (its parent) for the roll. The boxes are flex
+   containers so they hug the piece exactly, and a 110% shift always clears them. */
+.title,
+.status,
+.description,
+.more {
+  display: flex;
+  margin: 0;
+  overflow: clip;
+}
+
+.piece {
+  display: block;
+}
+
+.status .piece {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dot {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.description {
+  font: 600 17px / 1.45 var(--font-body);
+}
+
+/* The underline sits inside the link's box (padding), so the clip doesn't cut it off. */
+.more .piece {
+  padding-bottom: 8px;
+  color: inherit;
+  text-decoration: underline 2px;
+  text-underline-offset: 6px;
+}
+
+.more:has(:focus-visible) {
+  overflow: visible;
+}
+
+.more .piece:focus-visible {
+  outline: 3px solid var(--mih-ink);
+  outline-offset: 2px;
+}
+
+/* The Koulen roll title: each letter clipped to the capitals' box ("Touching
+   rows": the caps are 0.717em tall and start 0.108em below a line-height: 1 box). */
+.rollTitle {
+  display: none;
+  flex-wrap: wrap;
+  gap: 0.1em 0.2em;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--projects-title);
+  font-weight: 400;
+  line-height: 1;
+}
+
+.word {
+  display: flex;
+}
+
+.letter {
+  display: block;
+  height: 0.717em;
+  overflow: clip;
+}
+
+.letter > span {
+  display: block;
+  margin-top: -0.108em;
+}
+
+.toggle,
+.controls,
+.spot {
+  display: none;
+}
+
+/* The view toggle: an ink capsule of two icon buttons. An ink thumb slides under the pressed
+   one, whose icon turns paper; the thumb follows aria-pressed (set by projectsWheel.ts), so the
+   slide is plain CSS. The buttons are equal widths, so the thumb moves by its own width. */
+.toggle {
+  position: relative;
+  padding: 3px;
+  border: 2px solid var(--mih-ink);
+  border-radius: 999px;
+  isolation: isolate;
+}
+
+.thumb {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  z-index: -1;
+  width: 46px;
+  border-radius: 999px;
+  background: var(--mih-ink);
+  transition: transform 200ms var(--ease-throw);
+}
+
+.toggle:has([data-view-button='grid'][aria-pressed='true']) .thumb {
+  transform: translateX(100%);
+}
+
+.toggleButton {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--mih-ink);
+  cursor: pointer;
+  transition:
+    color 200ms var(--ease-throw),
+    background-color 200ms var(--ease-throw);
+}
+
+/* Hovering the view that isn't showing: a light gray pill, mixed from the palette. */
+@media (hover: hover) {
+  .toggleButton[aria-pressed='false']:hover {
+    background-color: color-mix(in srgb, var(--mih-ink) 8%, var(--mih-paper));
+  }
+}
+
+.toggleButton[aria-pressed='true'] {
+  color: var(--mih-paper);
+}
+
+.toggleButton svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.toggleButton:focus-visible,
+.arrow:focus-visible {
+  outline: 3px solid var(--mih-ink);
+  outline-offset: 3px;
+}
+
+.arrow {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 2px solid var(--mih-ink);
+  border-radius: 50%;
+  background: none;
+  color: var(--mih-ink);
+  cursor: pointer;
+  position: relative;
+  overflow: clip;
+  isolation: isolate;
+  transition: color 300ms var(--ease-throw);
+}
+
+/* The hover fill (hoverFill.ts): an ink circle, placed and scaled from the pointer's entry and
+   exit points. It sits inside the border (the clip is the padding box), so the ring stays. */
+.ink {
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  background: var(--mih-ink);
+  transform: scale(0);
+  pointer-events: none;
+}
+
+.arrow[data-filled] {
+  color: var(--mih-paper);
+  transition-duration: 350ms;
+}
+
+.arrow svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.arrow[aria-disabled='true'] {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.counter {
+  min-width: 4em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Phone: the stacked list (below 960px)
+   --------------------------------------------------------------------------------------------- */
+
+.section {
+  padding: clamp(48px, 12vw, 72px) var(--projects-margin) 64px;
+}
+
+.top {
+  margin-bottom: 32px;
+}
+
+.list {
+  display: grid;
+  gap: 64px;
+}
+
+.title {
+  margin-top: 20px;
+  font: 400 clamp(48px, 14vw, 72px) / 0.9 var(--font-display);
+  text-transform: uppercase;
+}
+
+.status {
+  margin-top: 12px;
+}
+
+.description {
+  margin-top: 12px;
+}
+
+.more {
+  margin-top: 16px;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Desktop: the grid (the fallback, and the grid view)
+   --------------------------------------------------------------------------------------------- */
+
+@media (min-width: 960px) {
+  .section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+    min-height: 100svh;
+    padding: calc(var(--projects-top) + 64px) var(--projects-margin) 64px;
+  }
+
+  /* Absolutely placed in both views, so toggling never moves it. */
+  .top {
+    position: absolute;
+    top: var(--projects-top);
+    right: var(--projects-margin);
+    left: var(--projects-margin);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    margin: 0;
+  }
+
+  .section[data-view] .toggle {
+    display: flex;
+  }
+
+  .list {
+    grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
+    gap: 40px 32px;
+  }
+
+  .title {
+    margin-top: 16px;
+    font: 700 22px / 1.3 var(--font-body);
+    text-transform: none;
+  }
+
+  .status {
+    margin-top: 4px;
+  }
+
+  .status .dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  .description,
+  .more {
+    display: none;
+  }
+
+  /* The card-sized box the wheel's current card sits in; measured in both views. */
+  .spot {
+    position: absolute;
+    top: var(--card-top);
+    right: var(--projects-margin);
+    display: block;
+    width: var(--card-w);
+    height: var(--card-h);
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Desktop: the wheel. Applied by data-view="wheel", and before the wheel starts under html.mih-js
+   (no data-view yet), so a /#projects visitor never sees the grid flash into the wheel.
+   --------------------------------------------------------------------------------------------- */
+
+@media (min-width: 960px) and (prefers-reduced-motion: no-preference) {
+  .section[data-view='wheel'],
+  :global(html.mih-js) .section:not([data-view]) {
+    position: sticky;
+    top: 0;
+    display: block;
+    height: 100svh;
+    padding: 0;
+    overflow: clip;
+  }
+
+  /* The scroll hold: the wrapper is a hold's length taller than the section, which pins at the
+     screen's top while the page scrolls through it, then leaves with the wrapper. */
+  .hold:has(> .section[data-view='wheel']),
+  :global(html.mih-js) .hold:has(> .section:not([data-view])) {
+    height: calc(100svh + var(--projects-hold));
+  }
+
+  /* The list and items cover the section but take no pointer events; the cards and the
+     current info do. The top row and the controls stack above the cards (z-index up to 50). */
+  .section[data-view='wheel'] .list,
+  :global(html.mih-js) .section:not([data-view]) .list {
+    position: absolute;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+    /* The edge fade (section handovers): neighbour cards dissolve into the paper before the
+       section's edges instead of being cut. The band stops 24px short of the current card. Only
+       the gradient's alpha counts, so the ink never shows. */
+    --projects-fade: clamp(0px, var(--card-top) - 24px, 160px);
+    mask-image: linear-gradient(
+      transparent,
+      var(--mih-ink) var(--projects-fade),
+      var(--mih-ink) calc(100% - var(--projects-fade)),
+      transparent
+    );
+  }
+
+  .section[data-view='wheel'] .top,
+  :global(html.mih-js) .section:not([data-view]) .top {
+    z-index: 60;
+  }
+
+  .section[data-view='wheel'] .item,
+  :global(html.mih-js) .section:not([data-view]) .item {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .section[data-view='wheel'] .card,
+  :global(html.mih-js) .section:not([data-view]) .card {
+    position: absolute;
+    top: var(--card-top);
+    right: var(--projects-margin);
+    width: var(--card-w);
+    height: var(--card-h);
+    pointer-events: auto;
+    will-change: transform, opacity;
+  }
+
+  .section[data-view='wheel'] .info,
+  :global(html.mih-js) .section:not([data-view]) .info {
+    position: absolute;
+    top: var(--card-top);
+    left: var(--projects-margin);
+    width: min(36rem, 100% - var(--card-w) - 2 * var(--projects-margin) - 4vw);
+    pointer-events: auto;
+  }
+
+  .section[data-view='wheel'] .rollTitle,
+  :global(html.mih-js) .section:not([data-view]) .rollTitle {
+    display: flex;
+  }
+
+  .section[data-view='wheel'] .title,
+  :global(html.mih-js) .section:not([data-view]) .title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .section[data-view='wheel'] .status,
+  :global(html.mih-js) .section:not([data-view]) .status {
+    margin-top: 28px;
+  }
+
+  .section[data-view='wheel'] .status .dot,
+  :global(html.mih-js) .section:not([data-view]) .status .dot {
+    width: 12px;
+    height: 12px;
+  }
+
+  .section[data-view='wheel'] .description,
+  :global(html.mih-js) .section:not([data-view]) .description {
+    display: flex;
+    max-width: 32rem;
+    margin-top: 16px;
+    font: 600 clamp(17px, 0.5rem + 0.85vw, 20px) / 1.45 var(--font-body);
+  }
+
+  .section[data-view='wheel'] .more,
+  :global(html.mih-js) .section:not([data-view]) .more {
+    display: flex;
+    margin-top: 24px;
+  }
+
+  .section[data-view='wheel'] .controls {
+    position: absolute;
+    z-index: 60;
+    bottom: clamp(32px, 7svh, 64px);
+    left: var(--projects-margin);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  /* Before the wheel starts: the first project on top, the others' info hidden. */
+  :global(html.mih-js) .section:not([data-view]) .item:first-child .card {
+    z-index: 40;
+  }
+
+  :global(html.mih-js) .section:not([data-view]) .item:not(:first-child) .info {
+    visibility: hidden;
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Hover: the art eases in a little (current wheel card and grid cards; never under reduced
+   motion). It uses `scale`, so it never fights the phone reveal's `transform`.
+   --------------------------------------------------------------------------------------------- */
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .art {
+    transition: scale var(--dur-throw) var(--ease-throw);
+  }
+
+  .section:not([data-view='wheel']) .card:hover .art,
+  .item[data-current] .card:hover .art {
+    scale: 1.04;
+  }
+}

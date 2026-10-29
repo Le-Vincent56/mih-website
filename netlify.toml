@@ -1,0 +1,18 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+# There is no project index page: /projects goes to the homepage's Projects section.
+[[redirects]]
+  from = "/projects"
+  to = "/#projects"
+  status = 301
+
+# Vite emits content-hashed files under /assets/.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

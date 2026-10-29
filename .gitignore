@@ -1,0 +1,26 @@
+# dependencies and build output
+node_modules/
+dist/
+*.local
+.env
+.env.*
+!.env.example
+
+# tooling
+.netlify/
+coverage/
+*.tsbuildinfo
+*.log
+
+# OS
+.DS_Store
+
+# Claude Code and its documentation stay local, never on GitHub:
+# settings, hooks, and skills; project instructions; specs, plans, proposals, design system,
+# inspiration, prompts, the archive, and the Fast Frankie migration source (docs/migration/)
+.claude/
+CLAUDE.md
+docs/
+
+# Brainstorm companion mockups (superpowers), kept locally for reference
+.superpowers/

@@ -1,0 +1,110 @@
+/* <Video id title poster>: a click-to-load facade, then the nocookie player. */
+
+.video {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  margin: 48px 0;
+  overflow: clip;
+  border-radius: var(--radius-card);
+  background: var(--mih-ink);
+}
+
+.facade {
+  display: grid;
+  position: absolute;
+  inset: 0;
+  place-items: center;
+  color: var(--mih-paper);
+  text-decoration: none;
+}
+
+.facade:focus-visible {
+  outline: 3px solid var(--mih-paper);
+  outline-offset: -6px;
+  border-radius: var(--radius-card);
+}
+
+.poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 40%,
+    color-mix(in srgb, var(--mih-ink) 70%, transparent)
+  );
+}
+
+.play {
+  display: grid;
+  position: relative;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: var(--accent);
+  transition: transform 300ms var(--ease-throw);
+}
+
+/* An ink triangle, nudged right so it looks centered. */
+.play::after {
+  content: '';
+  margin-left: 8px;
+  border-top: 16px solid transparent;
+  border-bottom: 16px solid transparent;
+  border-left: 26px solid var(--mih-ink);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .facade:hover .play {
+    transform: scale(1.08);
+  }
+}
+
+.facade:focus-visible .play {
+  transform: scale(1.08);
+}
+
+.title {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  right: 24px;
+  font: 700 clamp(15px, 0.5rem + 0.7vw, 18px) / 1.4 var(--font-body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.player {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+@media (max-width: 959.98px) {
+  .play {
+    width: 64px;
+    height: 64px;
+  }
+
+  .play::after {
+    margin-left: 6px;
+    border-top-width: 12px;
+    border-bottom-width: 12px;
+    border-left-width: 19px;
+  }
+
+  .title {
+    bottom: 16px;
+    left: 16px;
+  }
+}

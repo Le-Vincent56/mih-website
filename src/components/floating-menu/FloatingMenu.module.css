@@ -1,0 +1,183 @@
+/* The floating menu: the circle the letterbox bar gives way to (barMorph.ts), and the ripple menu's dialog
+   (rippleMotion.ts). Resting styles are the settled states (the menu fully open), which is what
+   reduced motion shows. */
+
+.circle {
+  --size: 64px;
+  --gutter: 24px;
+
+  position: fixed;
+  right: var(--gutter);
+  bottom: var(--gutter);
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  width: var(--size);
+  height: var(--size);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--mih-ink);
+  cursor: pointer;
+  /* Parked above the footer: useCircleLift writes how far it has come up. (The swap animates
+     `transform`, so the two compose.) */
+  translate: 0 calc(-1 * var(--lift, 0px));
+  visibility: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Shown in the circle state, and while it rises or sinks (html[data-bar-swap]). */
+.circle[data-mode='circle'],
+:global(html[data-bar-swap]) .circle {
+  visibility: visible;
+}
+
+.circle:hover {
+  background: color-mix(in srgb, var(--mih-ink) 85%, var(--mih-paper));
+}
+
+/* An ink ring over a paper gap, so it reads over paper and over ink. */
+.circle:focus-visible {
+  outline: 2px solid var(--mih-ink);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 3px var(--mih-paper);
+}
+
+/* The house logo, as in the header (copied: Vite doesn't rebase url() through `composes`). */
+.mark {
+  width: 28px;
+  aspect-ratio: 530 / 549;
+  background: var(--mih-paper);
+  mask: url('../../assets/brand/logo-mark.png') center / contain no-repeat;
+}
+
+/* --- The ripple menu --- */
+
+.dialog {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  overflow: clip;
+  border: 0;
+  background: transparent;
+}
+
+.dialog::backdrop {
+  background: transparent;
+}
+
+:global(body):has(.dialog[open]) {
+  overflow: hidden;
+}
+
+.flood {
+  position: absolute;
+  inset: 0;
+  background: var(--mih-ink);
+}
+
+.rings {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* Each ring turns around the hub (its transform-origin, set inline). */
+.ring {
+  transform-box: view-box;
+}
+
+.link {
+  outline: none;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.line {
+  fill: none;
+  stroke: color-mix(in srgb, var(--mih-paper) 18%, var(--mih-ink));
+  stroke-width: 1.5;
+  pointer-events: none;
+  transition:
+    stroke 200ms var(--ease-throw),
+    stroke-width 200ms var(--ease-throw);
+}
+
+.label {
+  fill: var(--mih-paper);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  transition: fill 200ms var(--ease-throw);
+}
+
+/* You are here; hover and keyboard focus. */
+.link[aria-current] .line,
+.link:hover .line,
+.link:focus-visible .line {
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.link:hover .label,
+.link:focus-visible .label {
+  fill: var(--accent);
+}
+
+/* The circle's copy, placed over it (inline): a paper disc with an ink X. */
+.close {
+  position: fixed;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--mih-paper);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.close > * {
+  grid-area: 1 / 1;
+}
+
+.close:focus-visible {
+  outline: 2px solid var(--mih-paper);
+  outline-offset: 3px;
+}
+
+.close .mark {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.4);
+}
+
+.stroke {
+  width: 40%;
+  height: 2.5px;
+  border-radius: 1px;
+  background: var(--mih-ink);
+  transform: rotate(45deg) scaleX(1);
+}
+
+.stroke + .stroke {
+  transform: rotate(-45deg) scaleX(1);
+}
+
+@media (max-width: 767px) {
+  .circle {
+    --size: 56px;
+    --gutter: 16px;
+  }
+
+  .mark {
+    width: 24px;
+  }
+}
